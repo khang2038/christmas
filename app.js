@@ -81,26 +81,17 @@ var canvas = document.getElementById("snow"),
   ctx = canvas.getContext("2d"),
   width = (ctx.canvas.width = canvas.offsetWidth),
   height = (ctx.canvas.height = canvas.offsetHeight),
-  animFrame =
-    window.requestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.msRequestAnimationFrame,
   snowflakes = [];
 
 window.onresize = function () {
   width = ctx.canvas.width = canvas.offsetWidth;
   height = ctx.canvas.height = canvas.offsetHeight;
 
-  for (var i = 0; i < snowflakes.length; i++) {
-    snowflakes[i].resized();
-  }
+  snowflakes.forEach((flake) => flake.resized());
 };
 
-function update() {
-  for (var i = 0; i < snowflakes.length; i++) {
-    snowflakes[i].update();
-  }
+function updateSnowflakes() {
+  snowflakes.forEach((flake) => flake.update());
 }
 
 function Snow() {
@@ -133,7 +124,7 @@ Snow.prototype.update = function () {
   this.y += this.speed;
   this.x += this.wind;
 
-  if (this.y > ctx.canvas.height) {
+  if (this.y > height) {
     if (this.isResized) {
       this.updateData();
       this.isResized = false;
@@ -146,31 +137,27 @@ Snow.prototype.update = function () {
 
 function createSnow(count) {
   for (var i = 0; i < count; i++) {
-    snowflakes[i] = new Snow();
+    snowflakes.push(new Snow());
   }
 }
 
-function draw() {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  for (var i = 0; i < snowflakes.length; i++) {
-    snowflakes[i].draw();
-  }
+function drawSnowflakes() {
+  ctx.clearRect(0, 0, width, height);
+  snowflakes.forEach((flake) => flake.draw());
 }
 
-function loop() {
-  draw();
-  update();
-  animFrame(loop);
+function snowLoop() {
+  drawSnowflakes();
+  updateSnowflakes();
+  requestAnimationFrame(snowLoop);
 }
 
 function random(min, max) {
-  var rand = (min + Math.random() * (max - min)).toFixed(1);
-  rand = Math.round(rand);
-  return rand;
+  return Math.random() * (max - min) + min;
 }
 
 createSnow(200);
-loop();
+snowLoop();
 
 //----------tree----------
 MorphSVGPlugin.convertToPath("polygon");
