@@ -1,5 +1,4 @@
 var bbiTL = new TimelineMax(),
-  // logo
   frame = document.getElementById("frame"),
   happy = document.getElementById("happy"),
   merry = document.getElementById("merry"),
@@ -9,33 +8,30 @@ var bbiTL = new TimelineMax(),
   left_tree = document.getElementById("left_tree"),
   right_tree = document.getElementById("right_tree");
 
-// animations
-
-// item drop
+// Item drop animation
 var totalItems = 18;
 for (var i = 1; i <= totalItems; ++i) {
-  var lenght = Math.random() * (4.5 - 3) + 3;
+  var duration = Math.random() * (4.5 - 3) + 3;
   var start = Math.random();
 
-  // hanging
-  hanging(totalItems, i, lenght, start);
+  hanging(totalItems, i, duration, start);
 
   bbiTL.fromTo(
     "#item" + i,
-    lenght,
-    { y: -($("#item" + i).height() / 3) },
-    { ease: Bounce.easeOut, y: 0 },
+    duration,
+    { y: -$("#item" + i).height() / 3 },
+    { ease: "bounce.out", y: 0 },
     start
   );
 }
 
-// item hanging
-
-function hanging(totalItems, i, lenght, start) {
+// Item hanging animation
+function hanging(totalItems, i, duration, start) {
   var hangOffset = 0.3;
-  var hangStart = start + lenght - 0.2;
+  var hangStart = start + duration - 0.2;
   var delay = Math.random() * 3 + 1;
-  var rotation = -((1 / lenght) * 3);
+  var rotation = -((1 / duration) * 3);
+
   bbiTL.to(
     "#item" + i,
     hangOffset,
@@ -43,35 +39,35 @@ function hanging(totalItems, i, lenght, start) {
       rotation: rotation,
       transformOrigin: "0% 0%",
       repeatDelay: 0,
-      ease: Back.easeOut.config(2),
+      ease: "back.out(2)",
       repeat: -1,
     },
     hangStart / 3
   );
+
   bbiTL.to(
     "#item" + i,
     10,
     {
       rotation: 0,
       transformOrigin: "0% 0%",
-      ease: Elastic.easeOut.config(2.5, 0.1),
+      ease: "elastic.out(2.5, 0.1)",
       repeatDelay: hangOffset,
       repeat: -1,
     },
     (hangStart + hangOffset) / 3
   );
-  console.log(rotation);
 }
 
 function happyNewYear() {
   for (var h = 1; h <= 16; ++h) {
-    var leters = h * 0.1;
+    var delay = h * 0.1;
     bbiTL.fromTo(
       ".happy_" + h,
       0.2,
       { scale: -1, opacity: 0 },
-      { scale: 1, ease: Back.easeOut.config(1.4), opacity: 1 },
-      leters + 4
+      { scale: 1, ease: "back.out(1.4)", opacity: 1 },
+      delay + 4
     );
   }
 }
@@ -159,234 +155,6 @@ function random(min, max) {
 createSnow(200);
 snowLoop();
 
-//----------tree----------
-MorphSVGPlugin.convertToPath("polygon");
-var xmlns = "http://www.w3.org/2000/svg",
-  xlinkns = "http://www.w3.org/1999/xlink",
-  select = function (s) {
-    return document.querySelector(s);
-  },
-  selectAll = function (s) {
-    return document.querySelectorAll(s);
-  },
-  pContainer = select(".pContainer"),
-  mainSVG = select(".mainSVG"),
-  star = select("#star"),
-  sparkle = select(".sparkle"),
-  tree = select("#tree"),
-  showParticle = true,
-  particleColorArray = [
-    "#E8F6F8",
-    "#ACE8F8",
-    "#F6FBFE",
-    "#A2CBDC",
-    "#B74551",
-    "#5DBA72",
-    "#910B28",
-    "#910B28",
-    "#446D39",
-  ],
-  particleTypeArray = ["#star", "#circ", "#cross", "#heart"],
-  // particleTypeArray = ['#star'],
-  particlePool = [],
-  particleCount = 0,
-  numParticles = 201;
-
-gsap.set("svg", {
-  visibility: "visible",
-});
-
-gsap.set(sparkle, {
-  transformOrigin: "50% 50%",
-  y: -100,
-});
-
-let getSVGPoints = (path) => {
-  let arr = [];
-  var rawPath = MotionPathPlugin.getRawPath(path)[0];
-  rawPath.forEach((el, value) => {
-    let obj = {};
-    obj.x = rawPath[value * 2];
-    obj.y = rawPath[value * 2 + 1];
-    if (value % 2) {
-      arr.push(obj);
-    }
-    //console.log(value)
-  });
-
-  return arr;
-};
-let treePath = getSVGPoints(".treePath"),
-  treeBottomPath = getSVGPoints(".treeBottomPath"),
-  mainTl = gsap.timeline({ delay: 0, repeat: 0 }),
-  starTl;
-
-function flicker(p) {
-  gsap.killTweensOf(p, { opacity: true });
-  gsap.fromTo(
-    p,
-    {
-      opacity: 1,
-    },
-    {
-      duration: 0.07,
-      opacity: Math.random(),
-      repeat: -1,
-    }
-  );
-}
-
-function createParticles() {
-  var i = numParticles,
-    p,
-    particleTl,
-    step = numParticles / treePath.length,
-    pos;
-  while (--i > -1) {
-    p = select(particleTypeArray[i % particleTypeArray.length]).cloneNode(true);
-    mainSVG.appendChild(p);
-    p.setAttribute("fill", particleColorArray[i % particleColorArray.length]);
-    p.setAttribute("class", "particle");
-    particlePool.push(p);
-    //hide them initially
-    gsap.set(p, {
-      x: -100,
-      y: -100,
-      transformOrigin: "50% 50%",
-    });
-  }
-}
-
-var getScale = gsap.utils.random(0.5, 3, 0.001, true);
-
-function playParticle(p) {
-  if (!showParticle) {
-    return;
-  }
-  var p = particlePool[particleCount];
-  gsap.set(p, {
-    x: gsap.getProperty(".pContainer", "x"),
-    y: gsap.getProperty(".pContainer", "y"),
-    scale: getScale(),
-  });
-  var tl = gsap.timeline();
-  tl.to(p, {
-    duration: gsap.utils.random(0.61, 6),
-    physics2D: {
-      velocity: gsap.utils.random(-23, 23),
-      angle: gsap.utils.random(-180, 180),
-      gravity: gsap.utils.random(-6, 50),
-    },
-    scale: 0,
-    rotation: gsap.utils.random(-123, 360),
-    ease: "power1",
-    onStart: flicker,
-    onStartParams: [p],
-    onRepeat: (p) => {
-      gsap.set(p, {
-        scale: getScale(),
-      });
-    },
-    onRepeatParams: [p],
-  });
-
-  particleCount++;
-  particleCount = particleCount >= numParticles ? 0 : particleCount;
-}
-
-function drawStar() {
-  starTl = gsap.timeline({ onUpdate: playParticle });
-  starTl
-    .to(".pContainer, .sparkle", {
-      duration: 6,
-      motionPath: {
-        path: ".treePath",
-        autoRotate: false,
-      },
-      ease: "linear",
-    })
-    .to(".pContainer, .sparkle", {
-      duration: 1,
-      onStart: function () {
-        showParticle = false;
-      },
-      x: treeBottomPath[0].x,
-      y: treeBottomPath[0].y,
-    })
-    .to(
-      ".pContainer, .sparkle",
-      {
-        duration: 2,
-        onStart: function () {
-          showParticle = true;
-        },
-        motionPath: {
-          path: ".treeBottomPath",
-          autoRotate: false,
-        },
-        ease: "linear",
-      },
-      "-=0"
-    )
-    .from(
-      ".treeBottomMask",
-      {
-        duration: 2,
-        drawSVG: "0% 0%",
-        stroke: "#FFF",
-        ease: "linear",
-      },
-      "-=2"
-    );
-}
-
-createParticles();
-drawStar();
-
-mainTl
-  .from([".treePathMask", ".treePotMask"], {
-    duration: 6,
-    drawSVG: "0% 0%",
-    stroke: "#FFF",
-    stagger: {
-      each: 6,
-    },
-    duration: gsap.utils.wrap([6, 1, 2]),
-    ease: "linear",
-  })
-  .from(
-    ".treeStar",
-    {
-      duration: 3,
-      scaleY: 0,
-      scaleX: 0.15,
-      transformOrigin: "50% 50%",
-      ease: "elastic(1,0.5)",
-    },
-    "-=4"
-  )
-
-  .to(
-    ".sparkle",
-    {
-      duration: 3,
-      opacity: 0,
-      ease: "rough({strength: 2, points: 100, template: linear, taper: both, randomize: true, clamp: false})",
-    },
-    "-=0"
-  )
-  .to(
-    ".treeStarOutline",
-    {
-      duration: 1,
-      opacity: 1,
-      ease: "rough({strength: 2, points: 16, template: linear, taper: none, randomize: true, clamp: false})",
-    },
-    "+=1"
-  );
-
-mainTl.add(starTl, 0);
-gsap.globalTimeline.timeScale(1.5);
 
 $(document).ready(function () {
   var $card = $(".card"),
